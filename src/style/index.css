@@ -1,0 +1,25 @@
+
+
+* {
+    margin: 0;
+    padding: 0;
+   
+}
+
+
+
+.cell {
+    width: 30px;
+    height: 30px;
+    border: 1px solid #ccc;
+    transition: background-color 0.2s;
+    text-align: center;
+    /* background-image: url(./images/triangletwo-right.svg); */
+    background-repeat: no-repeat;
+    
+}
+
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
