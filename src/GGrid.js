@@ -58,12 +58,12 @@ export default function Main() {
     }
     arr[i][j].color = "blue";
   };
-  const handleDrap = (i, j) => {
+  const handleDrap = (i, j, options = {}) => {
     let tempArr = arr;
-    if (changeTarget) {
+    if (changeTarget || options.target) {
       setTarget({ x: i, y: j });
       return;
-    } else if (changeSource) {
+    } else if (changeSource || options.source) {
       setSource({ x: i, y: j });
       return;
     }
@@ -72,16 +72,21 @@ export default function Main() {
     } else if (arr[i][j].color === "black") {
       tempArr[i][j].color = "";
     }
+    console.log('draing')
     setArr([...tempArr]);
   };
   const handleMouseDown = (x, y) => {
+    setDragging(true);
     if (x === target.x && y === target.y) {
+      handleDrap(x, y, {target:true});
       setChangeTarget(true);
     } else if (x === source.x && y === source.y) {
-      setChangeSource(true);
+      setChangeSource(true,  {source:true});
     }
-    setDragging(true);
-    handleDrap(x, y);
+    else {
+      handleDrap(x, y);
+    }
+   
   };
   const handleMouseEnter = (x, y) => {
     if (dragging) {
