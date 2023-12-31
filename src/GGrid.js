@@ -7,15 +7,23 @@ import { shuffle2DArray } from "./util/shuffle";
 import { DropDown } from "./components/DropDown";
 
 //Todo: select options from small medium and larget grid
-const row = 17, col = 35, colorCount = 1;
+const row = 17,
+  col = 35,
+  colorCount = 1;
 let speed = 1;
 let pause = false;
-const DropDownOptions = [
+const algorithmOptions = [
   { label: "BFS", value: "BFS" },
   { label: "DFS", value: "DFS" },
   { label: "DIJKSTRA", value: "DIJKSTRA" },
   { label: "Flood Fill", value: "Flood Fill" },
 ];
+
+const gridOptions = [
+  {label: "blank", value:'Hard'},
+  {label:"remove color",value:"removeColor"},
+  {label:"add maze",value:"Maze"},
+]
 const inRange = (arr, i, j) => {
   return !(i < 0 || i > row - 1 || j < 0 || j > col);
 };
@@ -32,7 +40,8 @@ export default function Main() {
   const [changeTarget, setChangeTarget] = useState(false);
   const [source, setSource] = useState({ x: 0, y: 0 });
   const [changeSource, setChangeSource] = useState(false);
-  const [algorithm, setAlgorithm] = useState(DropDownOptions[0]);
+  const [algorithm, setAlgorithm] = useState(algorithmOptions[0].value);
+  const [gridOption, setGridOption] = useState(gridOptions[2].value);
   // const [pause, setPause] = useState(false);
   // const memoPause = useMemo(() => !pause, [pause]);
   const [forceUpdate, setForceUpdate] = useState(false);
@@ -46,7 +55,7 @@ export default function Main() {
   // const setPause = (value)=>pause = value}
   const renderPrev = (arr, i = 0, j = 0) => {
     while (arr[i][j]?.prev) {
-      arr[i][j].color = "blue"
+      arr[i][j].color = "blue";
       let obj = arr[i][j].prev;
       i = obj.i;
       j = obj.j;
@@ -68,21 +77,19 @@ export default function Main() {
     } else if (arr[i][j].color === "black") {
       tempArr[i][j].color = "";
     }
-    console.log('draging')
+    console.log("draging");
     setArr([...tempArr]);
   };
   const handleMouseDown = (x, y) => {
     setDragging(true);
     if (x === target.x && y === target.y) {
-      handleDrap(x, y, {target:true});
+      handleDrap(x, y, { target: true });
       setChangeTarget(true);
     } else if (x === source.x && y === source.y) {
-      setChangeSource(true,  {source:true});
-    }
-    else {
+      setChangeSource(true, { source: true });
+    } else {
       handleDrap(x, y);
     }
-   
   };
   const handleMouseEnter = (x, y) => {
     if (dragging) {
@@ -91,9 +98,9 @@ export default function Main() {
   };
   const handleMouseUp = () => {
     setDragging(false);
-    if(changeTarget){
+    if (changeTarget) {
       // renderPrev
-      setArr([...renderPrev(arr, target.x, target.y)])
+      setArr([...renderPrev(arr, target.x, target.y)]);
       setChangeTarget(false);
     }
     setChangeSource(false);
@@ -103,8 +110,8 @@ export default function Main() {
     const skipColor = new Set(["black"]);
     let newArr = arr.map((row) => {
       return row.map((cell) => {
-        if (skipColor.has(cell.color)) return { ...cell, prev: null };
-        return { ...cell, color: "", prev: null };
+        if (skipColor.has(cell.color)) return { ...cell, prev: null, value:null };
+        return { ...cell, color: "", prev: null, value:null };
       });
     });
     setArr(newArr);
@@ -118,10 +125,25 @@ export default function Main() {
     setArr(maze);
     return maze;
   };
-  const handleReset = () => {
+  const handleReset = (event) => {
     //should have two option one for hard and soft reset
     //createMaze option
     // setArr(createMap(row, col))
+    let value = event.target.value;
+    setGridOption(value);
+    if(value===gridOptions[0].value){
+      //remove every thing make is blank
+      setArr(createMap(row, col))
+    }
+    else if(value===gridOptions[1].value){
+        //remove the blue color only
+        softReset()
+    }
+    else if(value===gridOptions[2].value){
+      //create Maze
+      createMaze()
+    }
+
   };
   const handlePause = () => {
     pause = !pause;
@@ -137,16 +159,17 @@ export default function Main() {
     //should I soft reset the grid before running
     //need to have drop down, para - target, source
 
-    if (value === DropDownOptions[0].value) {
+    if (value === algorithmOptions[0].value) {
       //BFS
       runBFS(softReset(), source.x, source.y, setArr);
-    } else if (value === DropDownOptions[1].value) {
+    } else if (value === algorithmOptions[1].value) {
       //DFS weird also, don't use to find shortest path,
+      //delete the target
       runDFS(softReset(), source.x, source.y, setArr);
-    } else if (value === DropDownOptions[2].value) {
-      // Dijkstra Todo: to have old and new value
-      runDijkstra(addWeight([...arr]), source.x, source.y)
-    } else if (value === DropDownOptions[3].value) {
+    } else if (value === algorithmOptions[2].value) {
+      // Dijkstra Todo: to have old and new value, text get select
+      runDijkstra(addWeight([...arr]), source.x, source.y);
+    } else if (value === algorithmOptions[3].value) {
     }
   };
   const handleSpeedChange = (e) => {
@@ -346,15 +369,16 @@ export default function Main() {
     <>
       <div>
         <div className="inline-flex">
-          <button
+          {/* <button
             onClick={handleReset}
             className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l"
           >
             start/Reset
-          </button>
+          </button> */}
+          <DropDown label={"reset options"} value={gridOption} options={gridOptions} onChange={handleReset}/>
           <DropDown
             label={"select value"}
-            options={DropDownOptions}
+            options={algorithmOptions}
             value={algorithm}
             onChange={runAlgo}
           />

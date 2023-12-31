@@ -2,7 +2,7 @@ import sourceImg from "./style/images/triangletwo-right.svg";
 import targetImg from "./style/images/spaceshiptwo-right.svg";
 
 export default function Cell({ value, color, isSource, isTarget, ...rest }) {
-  if (isSource) {
+      if (isSource) {
     return (
       <div
         className="cell"

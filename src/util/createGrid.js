@@ -1,4 +1,4 @@
-function createMap(row, col, colorCount, addWeight = false) {
+function createMap(row, col, colorCount = 1, addWeight = false) {
   const map = [];
   console.log("createMap is called ");
   const color = ["", "green", "grey", "green", "yellow", ""];
