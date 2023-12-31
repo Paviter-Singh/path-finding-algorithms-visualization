@@ -10,6 +10,8 @@ function createMap(row, col, colorCount, addValue = false){
                 key:`${i}${j}`,
                 prev:null,
                 x:i,y:j,
+                isSource: false,
+                isTarget: false,
                 value: addValue?Math.floor(Math.random()*10):null, 
                 color: color[Math.floor(Math.random()*colorCount)],
                 callBack: function(x, y){console.log("cell with value ",x," ",y," is called ")}

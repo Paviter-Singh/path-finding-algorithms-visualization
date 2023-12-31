@@ -5,6 +5,7 @@ import Queue from './util/Queue';
 import PriorityQueueLinear from './util/priorityQueue';
 import { shuffle2DArray } from './util/shuffle'
 
+//could select options from small medium and larget grid
 const row = 17, col = 35, colorCount = 1
 // let SPEED = 500;
 let speed = 1;
@@ -13,12 +14,17 @@ let pause = false;
 const inRange = (arr, i, j )=>{
   return !(i < 0 || i > row - 1 || j < 0 || j > col)
 }
+//challenges -- pause option
 export default function Main() {
+  //naming conventions
     const [arr, setArr] = useState([])
     // const [speed, setSpeed] = useState(SPEED);
     const setSpeed = (value)=>{ speed = value;}
     const [isTarget, setIsTarget] = useState(false);
     const [target, setTarget] = useState({x:5,y:14});
+    const [changeTarget, setChangeTarget] = useState(false)
+    const [source, setSource] = useState({x:0,y:0});
+    const [changeSource, setChangeSource] = useState(false);
     // const [pause, setPause] = useState(false);
     // const memoPause = useMemo(() => !pause, [pause]);
     const [forceUpdate, setForceUpdate] = useState(false);
@@ -44,6 +50,14 @@ export default function Main() {
     }
     const consthandleDrap = (i, j)=>{
       let tempArr = arr 
+      if(changeTarget){
+        setTarget({x:i,y:j});
+        return
+      }
+      else if(changeSource){
+        setSource({x:i,y:j})
+        return;
+      }
       if(arr[i][j].color===''){
         tempArr[i][j].color = 'black'
       }
@@ -53,10 +67,15 @@ export default function Main() {
       setArr([...tempArr])
     }  
     const handleMouseDown = (x, y) => {
+      if(x==target.x && y==target.y){
+        setChangeTarget(true)
+      }
+      else if(x==source.x && y==source.y){
+        setChangeSource(true)
+      }
       setDragging(true);
       consthandleDrap(x, y);
     };  
-    
     const handleMouseEnter = (x, y) => {
       if (dragging) {
         consthandleDrap(x, y);
@@ -65,6 +84,8 @@ export default function Main() {
   
     const handleMouseUp = () => {
       setDragging(false);
+      setChangeTarget(false)
+      setChangeSource(false)
     };
     const handleClick = (i, j) => {
         // setTarget({x:i,y:j})
@@ -80,14 +101,28 @@ export default function Main() {
         // runBFS(arr, i, j, setArr)
     }
     const handleReset = () => {
+      const skipColor = new Set(["black"])
+      //should have two option one for hard and soft reset
+      //createMaze option
+
+      //code for soft reset
+      let newArr =  arr.map(row =>{
+        return row.map(cell =>{
+          if(skipColor.has(cell.color))return {...cell, prev:null}
+          return {...cell, color:"", prev:null }
+        })
+      })
+      console.log(newArr)
+      setArr(newArr)
+
         // console.log('handleReset is called')
-        // let maze = [...arr]
-        generateMaze(maze, 1, 1) 
+        // let maze =createMap( row, col, colorCount, false)
+        // generateMaze(maze, 1, 1) 
         // console.log(maze)
-        setArr(maze)
+        // setArr(maze)
         // setArr(createMap(row, col))
 
-        // runBFS(maze, 1, 1, setArr)
+        // runBFS(arr, source.x, source.y, setArr)
         // runDFS(arr, 0, 0)
         // runDijkstra(arr, 1, 1, setArr)
     }
@@ -99,8 +134,16 @@ export default function Main() {
     const handleChangeTarget = ()=>{
         setIsTarget(true)
     }
-    const handleRunFloodFill = () => {
-        console.log('handle Flood file called')
+    const runAlgo = () => {
+      //need to have drop down, para - target, source
+      
+      
+      // runBFS(arr, source.x, source.y, setArr)
+
+
+      //DFS weird also, don't use to find shortest path, 
+      runDFS(arr, source.x, source.y, setArr)
+    
     }
     const handleSpeedChange = (e) => {
         const newSpeed = parseInt(e.target.value, 10);
@@ -248,7 +291,7 @@ export default function Main() {
           await exploreNeighbors(minNode);
         }
         return arr;
-      };
+    };
     const runDFS = async (arr, startI, startJ) => {
         let stack = [];
         let dxy = [[-1,0],[1,0],[0,-1],[0,1]];
@@ -279,22 +322,20 @@ export default function Main() {
           }
         }      
         return arr;
-      };  
+    };  
     return (<><div>
         <div className="inline-flex">
   <button onClick={handleReset} className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l">
   start/Reset
   </button>
-  <button onClick={handleRunFloodFill} className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-r">
+  <button onClick={runAlgo} className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-r">
   Run Flood file
   </button>
 <button className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-r" onClick={handleChangeTarget}>{isTarget?"select the target":'No target selected '}</button>
         <button onClick={handlePause} className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-r">{pause?'resume':'pause'}</button>
 </div>
-      
-        <input
+      <input
       onChange={handleSpeedChange}
-      
       type='number'
       max="1000"
       min="0"
@@ -303,13 +344,18 @@ export default function Main() {
     </div>
         <div style={{ display: "flex", marginLeft: "5px", width: '1080px', flexWrap: "wrap" }}>{
             arr.map((item) => {
-                    return item.map(({ key, x, y, color, callBack, value }) => {
+        
+                    return item.map(({ key, x, y, color, callBack, value, ...rest }) => {
+                      // console.log({x,y}, source)
                         return <Cell key={key} x={x} y={y} color={color} 
                           onClick={()=>handleClick(x, y)}
                           onMouseDown={() => handleMouseDown(x, y)}
                           onMouseEnter={() => handleMouseEnter(x, y)}
                           onMouseUp={handleMouseUp}
                           value={value}
+                          {...rest}
+                          isSource={(x==source.x && y==source.y)}
+                          isTarget={(x==target.x && y==target.y)}
                            />
                           }
                         )
