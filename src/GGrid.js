@@ -1,19 +1,15 @@
 import React, { useState, useEffect } from "react";
 import Cell from "./Cell";
-import { createMap } from "./util/createGrid";
+import { createMap, addWeight } from "./util/createGrid";
 import Queue from "./util/Queue";
 import PriorityQueueLinear from "./util/priorityQueue";
 import { shuffle2DArray } from "./util/shuffle";
 import { DropDown } from "./components/DropDown";
 
-//could select options from small medium and larget grid
-const row = 17,
-  col = 35,
-  colorCount = 1;
-// let SPEED = 500;
+//Todo: select options from small medium and larget grid
+const row = 17, col = 35, colorCount = 1;
 let speed = 1;
 let pause = false;
-// const Arr = createMap( row, col, colorCount, false)
 const DropDownOptions = [
   { label: "BFS", value: "BFS" },
   { label: "DFS", value: "DFS" },
@@ -48,15 +44,15 @@ export default function Main() {
     setForceUpdate(!forceUpdate); // Toggling a state variable can force a re-render.
   };
   // const setPause = (value)=>pause = value}
-  const renderPrev = (arr, i, j) => {
+  const renderPrev = (arr, i = 0, j = 0) => {
     while (arr[i][j]?.prev) {
-      arr[i][j].color = "blue";
-
+      arr[i][j].color = "blue"
       let obj = arr[i][j].prev;
       i = obj.i;
       j = obj.j;
     }
-    arr[i][j].color = "blue";
+    // arr[i][j].color = "blue";
+    return arr;
   };
   const handleDrap = (i, j, options = {}) => {
     let tempArr = arr;
@@ -72,7 +68,7 @@ export default function Main() {
     } else if (arr[i][j].color === "black") {
       tempArr[i][j].color = "";
     }
-    console.log('draing')
+    console.log('draging')
     setArr([...tempArr]);
   };
   const handleMouseDown = (x, y) => {
@@ -95,7 +91,11 @@ export default function Main() {
   };
   const handleMouseUp = () => {
     setDragging(false);
-    setChangeTarget(false);
+    if(changeTarget){
+      // renderPrev
+      setArr([...renderPrev(arr, target.x, target.y)])
+      setChangeTarget(false);
+    }
     setChangeSource(false);
   };
   const handleClick = (i, j) => {};
@@ -131,19 +131,21 @@ export default function Main() {
     setIsTarget(true);
   };
   const runAlgo = (event) => {
+    // Todo: could select same value
     let value = event.target.value;
     setAlgorithm(value);
     //should I soft reset the grid before running
     //need to have drop down, para - target, source
 
-    //BFS
     if (value === DropDownOptions[0].value) {
+      //BFS
       runBFS(softReset(), source.x, source.y, setArr);
     } else if (value === DropDownOptions[1].value) {
       //DFS weird also, don't use to find shortest path,
       runDFS(softReset(), source.x, source.y, setArr);
     } else if (value === DropDownOptions[2].value) {
-      // Dijkstra
+      // Dijkstra Todo: to have old and new value
+      runDijkstra(addWeight([...arr]), source.x, source.y)
     } else if (value === DropDownOptions[3].value) {
     }
   };

@@ -1,6 +1,6 @@
-function createMap(row, col, colorCount, addValue = false) {
+function createMap(row, col, colorCount, addWeight = false) {
   const map = [];
-  console.log("createMap is called ", addValue);
+  console.log("createMap is called ");
   const color = ["", "green", "grey", "green", "yellow", ""];
   for (let i = 0; i < row; i++) {
     let row = [];
@@ -12,7 +12,7 @@ function createMap(row, col, colorCount, addValue = false) {
         y: j,
         isSource: false,
         isTarget: false,
-        value: addValue ? Math.floor(Math.random() * 10) : null,
+       
         color: color[Math.floor(Math.random() * colorCount)],
         callBack: function (x, y) {
           console.log("cell with value ", x, " ", y, " is called ");
@@ -23,5 +23,14 @@ function createMap(row, col, colorCount, addValue = false) {
   }
   return map;
 }
-
-export { createMap };
+const addWeight = (arr)=>{
+  const skipColor = new Set(["black"]);
+  let newArr = arr.map((row) => {
+    return row.map((cell) => {
+      if (skipColor.has(cell.color)) return { ...cell, prev: null };
+      return { ...cell, color: "", prev: null, value: Math.floor(Math.random() * 10)};
+    });
+  });
+  return newArr
+}
+export { createMap, addWeight };
