@@ -4,6 +4,7 @@ import { createMap } from './util/createGrid'
 import Queue from './util/Queue';
 import PriorityQueueLinear from './util/priorityQueue';
 import { shuffle2DArray } from './util/shuffle'
+import { DropDown } from './components/DropDown';
 
 //could select options from small medium and larget grid
 const row = 17, col = 35, colorCount = 1
@@ -11,6 +12,7 @@ const row = 17, col = 35, colorCount = 1
 let speed = 1;
 let pause = false;
 // const Arr = createMap( row, col, colorCount, false)
+const DropDownOptions = [{label: 'BFS', value:"BFS"}, {label: 'DFS', value:"DFS"}, {label: 'DIJKSTRA', value:"DIJKSTRA"}, {label: 'Flood Fill', value:"Flood Fill"}]
 const inRange = (arr, i, j )=>{
   return !(i < 0 || i > row - 1 || j < 0 || j > col)
 }
@@ -25,6 +27,7 @@ export default function Main() {
     const [changeTarget, setChangeTarget] = useState(false)
     const [source, setSource] = useState({x:0,y:0});
     const [changeSource, setChangeSource] = useState(false);
+    const [algorithm, setAlgorithm] = useState(DropDownOptions[0]);
     // const [pause, setPause] = useState(false);
     // const memoPause = useMemo(() => !pause, [pause]);
     const [forceUpdate, setForceUpdate] = useState(false);
@@ -88,62 +91,66 @@ export default function Main() {
       setChangeSource(false)
     };
     const handleClick = (i, j) => {
-        // setTarget({x:i,y:j})
-        // if(isTarget){
-        //     setTarget({x:i,y:j})
-        //     setIsTarget(false)
-        //     if(arr[i][j].color==='green'){
-        //         renderPrev(arr, i, j)
-        //     }
-        //     return;
-        // }
-        // console.log('handleClick is called ', i, j)
-        // runBFS(arr, i, j, setArr)
+  
     }
-    const handleReset = () => {
+    const softReset = ()=>{
       const skipColor = new Set(["black"])
-      //should have two option one for hard and soft reset
-      //createMaze option
-
-      //code for soft reset
       let newArr =  arr.map(row =>{
         return row.map(cell =>{
           if(skipColor.has(cell.color))return {...cell, prev:null}
           return {...cell, color:"", prev:null }
         })
       })
-      console.log(newArr)
+      // console.log(newArr)
       setArr(newArr)
-
-        // console.log('handleReset is called')
-        // let maze =createMap( row, col, colorCount, false)
-        // generateMaze(maze, 1, 1) 
-        // console.log(maze)
-        // setArr(maze)
-        // setArr(createMap(row, col))
-
-        // runBFS(arr, source.x, source.y, setArr)
-        // runDFS(arr, 0, 0)
-        // runDijkstra(arr, 1, 1, setArr)
+      return newArr
     }
-    const handlePause = () => {
-       
+    const createMaze = ()=>{
+      //  let maze =createMap( row, col, colorCount, false)
+      let maze = softReset();
+      generateMaze(maze, 1, 1) 
+      console.log(maze)
+      setArr(maze)
+      return maze;
+    }
+    const handleReset = () => {
+      //should have two option one for hard and soft reset
+      //createMaze option
+      // setArr(createMap(row, col))
+      // runBFS(arr, source.x, source.y, setArr)
+      // runDFS(arr, 0, 0)
+      // runDijkstra(arr, 1, 1, setArr)
+    }
+    const handlePause = () => {     
         pause = !pause
         handleForceClick()
     }
     const handleChangeTarget = ()=>{
         setIsTarget(true)
     }
-    const runAlgo = () => {
+    const runAlgo = (event) => {
+      let value = event.target.value;
+      setAlgorithm(value)
+      //should I soft reset the grid before running
       //need to have drop down, para - target, source
       
+      //BFS
+      if(value==DropDownOptions[0].value){
+        runBFS(softReset(), source.x, source.y, setArr)   
+      }
+      else if(value==DropDownOptions[1].value){
+        //DFS weird also, don't use to find shortest path, 
+        runDFS(softReset(), source.x, source.y, setArr)
+      }
+      else if(value==DropDownOptions[2].value){
+        
+      }
+      else if(value==DropDownOptions[3].value){
+        
+      }
       
-      // runBFS(arr, source.x, source.y, setArr)
-
-
-      //DFS weird also, don't use to find shortest path, 
-      runDFS(arr, source.x, source.y, setArr)
-    
+      
+      
     }
     const handleSpeedChange = (e) => {
         const newSpeed = parseInt(e.target.value, 10);
@@ -328,9 +335,10 @@ export default function Main() {
   <button onClick={handleReset} className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l">
   start/Reset
   </button>
-  <button onClick={runAlgo} className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-r">
+  {/* <button onClick={runAlgo} className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-r">
   Run Flood file
-  </button>
+  </button> */}
+  <DropDown label={'select value'} options={DropDownOptions} value={algorithm} onChange={runAlgo}/>
 <button className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-r" onClick={handleChangeTarget}>{isTarget?"select the target":'No target selected '}</button>
         <button onClick={handlePause} className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-r">{pause?'resume':'pause'}</button>
 </div>
