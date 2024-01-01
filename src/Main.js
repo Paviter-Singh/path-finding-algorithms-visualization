@@ -12,7 +12,9 @@ import { sizeType } from "./types";
 let row = 17,
   col = 35,
   colorCount = 1;
-let speed = 1;
+
+//speed is below 10 don't stop
+let speed = 0;
 let pause = false;
 const algorithmOptions = [
   { label: "BFS", value: "BFS" },
@@ -156,17 +158,17 @@ export default function Main() {
   const handleChangeTarget = () => {
     setIsTarget(true);
   };
+  const handleAlgoChange = (event) => {
+    let value = event.target.value;
+    // console.log(value)
+    setAlgorithm(value);
+  };
   const runAlgo = (event) => {
     // Todo: could select same value
-    let value = event.target.value;
-    setAlgorithm(value);
-    const { x, y } = source;
-    let newArr = createMap(row, col, 2);
-    floodFill(newArr, x, y, newArr[x][y].color, "black", null);
-    return;
+
     //should I soft reset the grid before running
     //need to have drop down, para - target, source
-
+    const value = algorithm;
     if (value === algorithmOptions[0].value) {
       //BFS
       runBFS(softReset(), source.x, source.y, setArr);
@@ -180,7 +182,8 @@ export default function Main() {
     } else if (value === algorithmOptions[3].value) {
       //flood fill
       const { x, y } = source;
-      floodFill(createMap(row, col, 2), x, y, arr[x][y].color, "pink", null);
+      let newArr = createMap(row, col, 2);
+      floodFill(newArr, x, y, newArr[x][y].color, "black", null);
     }
   };
   const handleSpeedChange = (e) => {
@@ -320,10 +323,11 @@ export default function Main() {
           arr[x][y].color = "green";
           arr[x][y].prev = { i: minNode.x, j: minNode.y };
           qu.push(arr[x][y]);
-          setArr([...arr]);
-          // console.log(speed)
-
-          await new Promise((resolve) => setTimeout(resolve, speed));
+          if (speed > 5) {
+            setArr([...arr]);
+            if (speed > 5)
+              await new Promise((resolve) => setTimeout(resolve, speed));
+          }
         }
       }
       minNode.color = "green";
@@ -386,6 +390,12 @@ export default function Main() {
           >
             start/Reset
           </button> */}
+          <button
+            className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-r"
+            onClick={runAlgo}
+          >
+            Run
+          </button>
           <DropDown
             label={"reset options"}
             value={gridOption}
@@ -404,7 +414,7 @@ export default function Main() {
             label={"select value"}
             options={algorithmOptions}
             value={algorithm}
-            onChange={runAlgo}
+            onChange={handleAlgoChange}
           />
           <button
             className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-r"
