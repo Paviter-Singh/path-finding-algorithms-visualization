@@ -1,0 +1,1 @@
+export const  sizeType = ["small", "medium", "large"]
