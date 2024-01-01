@@ -5,7 +5,7 @@ import Queue from "./util/Queue";
 import PriorityQueueLinear from "./util/priorityQueue";
 import { shuffle2DArray } from "./util/shuffle";
 import { DropDown } from "./components/DropDown";
-import { sizeType } from "./types";
+import { sizeType, algorithmOptions, gridOptions } from "./types";
 //Todo: select options from small medium and larget grid
 //Todo: quesiton what to do when new state is selected, size
 //Todo: Color Choices
@@ -16,18 +16,7 @@ let row = 17,
 //speed is below 10 don't stop
 let speed = 0;
 let pause = false;
-const algorithmOptions = [
-  { label: "BFS", value: "BFS" },
-  { label: "DFS", value: "DFS" },
-  { label: "DIJKSTRA", value: "DIJKSTRA" },
-  { label: "Flood Fill", value: "Flood Fill" },
-];
 
-const gridOptions = [
-  { label: "blank", value: "Hard" },
-  { label: "remove color", value: "removeColor" },
-  { label: "add maze", value: "Maze" },
-];
 const inRange = (arr, i, j) => {
   return !(i < 0 || i > row - 1 || j < 0 || j > col);
 };
@@ -39,7 +28,7 @@ export default function Main() {
   const setSpeed = (value) => {
     speed = value;
   };
-  //default size large
+  //default size: large
   const [gridSize, setGridSize] = useState(sizeType[2]);
   const [isTarget, setIsTarget] = useState(false);
   const [target, setTarget] = useState({ x: 5, y: 14 });
@@ -160,7 +149,6 @@ export default function Main() {
   };
   const handleAlgoChange = (event) => {
     let value = event.target.value;
-    // console.log(value)
     setAlgorithm(value);
   };
   const runAlgo = (event) => {

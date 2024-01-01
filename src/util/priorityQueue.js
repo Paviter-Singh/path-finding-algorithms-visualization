@@ -54,7 +54,7 @@ export default class PriorityQueueLinear {
   }
 }
 
-class PriorityQueueHeap {
+export class PriorityQueueHeap {
   constructor(comparator = (a, b) => a > b) {
     this._heap = [];
     this._comparator = comparator;
