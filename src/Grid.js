@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Cell from './Cell'
 import { createMap } from './util/createGrid'
+import { sizeType } from './types';
 // import './style/GGrid.css'
 const row = 17, col = 32, colorCount = 1, speed = 200;
 

@@ -5,9 +5,11 @@ import Queue from "./util/Queue";
 import PriorityQueueLinear from "./util/priorityQueue";
 import { shuffle2DArray } from "./util/shuffle";
 import { DropDown } from "./components/DropDown";
-
+import { sizeType } from "./types";
 //Todo: select options from small medium and larget grid
-const row = 17,
+//Todo: quesiton what to do when new state is selected, size
+//Todo: Color Choices
+let row = 17,
   col = 35,
   colorCount = 1;
 let speed = 1;
@@ -20,10 +22,10 @@ const algorithmOptions = [
 ];
 
 const gridOptions = [
-  {label: "blank", value:'Hard'},
-  {label:"remove color",value:"removeColor"},
-  {label:"add maze",value:"Maze"},
-]
+  { label: "blank", value: "Hard" },
+  { label: "remove color", value: "removeColor" },
+  { label: "add maze", value: "Maze" },
+];
 const inRange = (arr, i, j) => {
   return !(i < 0 || i > row - 1 || j < 0 || j > col);
 };
@@ -35,6 +37,8 @@ export default function Main() {
   const setSpeed = (value) => {
     speed = value;
   };
+  //default size large
+  const [gridSize, setGridSize] = useState(sizeType[2]);
   const [isTarget, setIsTarget] = useState(false);
   const [target, setTarget] = useState({ x: 5, y: 14 });
   const [changeTarget, setChangeTarget] = useState(false);
@@ -44,14 +48,11 @@ export default function Main() {
   const [gridOption, setGridOption] = useState(gridOptions[2].value);
   // const [pause, setPause] = useState(false);
   // const memoPause = useMemo(() => !pause, [pause]);
-  const [forceUpdate, setForceUpdate] = useState(false);
   const [dragging, setDragging] = useState(false);
   useEffect(() => {
     setArr(createMap(row, col, colorCount, false));
   }, []);
-  const handleForceClick = () => {
-    setForceUpdate(!forceUpdate); // Toggling a state variable can force a re-render.
-  };
+  const handleForceClick = () => {};
   // const setPause = (value)=>pause = value}
   const renderPrev = (arr, i = 0, j = 0) => {
     while (arr[i][j]?.prev) {
@@ -105,13 +106,19 @@ export default function Main() {
     }
     setChangeSource(false);
   };
+  const handleGridSize = (event) => {
+    let value = event.target.value;
+    console.log(value);
+    setGridSize(value);
+  };
   const handleClick = (i, j) => {};
   const softReset = () => {
     const skipColor = new Set(["black"]);
     let newArr = arr.map((row) => {
       return row.map((cell) => {
-        if (skipColor.has(cell.color)) return { ...cell, prev: null, value:null };
-        return { ...cell, color: "", prev: null, value:null };
+        if (skipColor.has(cell.color))
+          return { ...cell, prev: null, value: null };
+        return { ...cell, color: "", prev: null, value: null };
       });
     });
     setArr(newArr);
@@ -131,19 +138,16 @@ export default function Main() {
     // setArr(createMap(row, col))
     let value = event.target.value;
     setGridOption(value);
-    if(value===gridOptions[0].value){
+    if (value === gridOptions[0].value) {
       //remove every thing make is blank
-      setArr(createMap(row, col))
-    }
-    else if(value===gridOptions[1].value){
-        //remove the blue color only
-        softReset()
-    }
-    else if(value===gridOptions[2].value){
+      setArr(createMap(row, col));
+    } else if (value === gridOptions[1].value) {
+      //remove the blue color only
+      softReset();
+    } else if (value === gridOptions[2].value) {
       //create Maze
-      createMaze()
+      createMaze();
     }
-
   };
   const handlePause = () => {
     pause = !pause;
@@ -156,6 +160,10 @@ export default function Main() {
     // Todo: could select same value
     let value = event.target.value;
     setAlgorithm(value);
+    const { x, y } = source;
+    let newArr = createMap(row, col, 2);
+    floodFill(newArr, x, y, newArr[x][y].color, "black", null);
+    return;
     //should I soft reset the grid before running
     //need to have drop down, para - target, source
 
@@ -170,6 +178,9 @@ export default function Main() {
       // Dijkstra Todo: to have old and new value, text get select
       runDijkstra(addWeight([...arr]), source.x, source.y);
     } else if (value === algorithmOptions[3].value) {
+      //flood fill
+      const { x, y } = source;
+      floodFill(createMap(row, col, 2), x, y, arr[x][y].color, "pink", null);
     }
   };
   const handleSpeedChange = (e) => {
@@ -226,7 +237,7 @@ export default function Main() {
 
     return arr;
   };
-  const floodFill = (arr, i, j, curr, color, target, prev) => {
+  const floodFill = (arr, i, j, curr, color, prev) => {
     // if(pause)return  {arr, color:curr};
     if (i < 0 || i > row - 1 || j < 0 || j > col || arr[i][j].color !== curr)
       return { arr, color };
@@ -235,16 +246,16 @@ export default function Main() {
       return { arr, color: curr };
     }
     arr[i][j].prev = prev;
-    if (target.x === i && target.y === j) {
-      renderPrev(arr, i, j);
-      return { arr, color: "green" };
-    }
+    // if (target.x === i && target.y === j) {
+    //   renderPrev(arr, i, j);
+    //   return { arr, color: "green" };
+    // }
     arr[i][j].color = color;
     setTimeout(() => {
-      floodFill(arr, i + 1, j, curr, color, target, { x: i, y: j });
-      floodFill(arr, i - 1, j, curr, color, target, { x: i, y: j });
-      floodFill(arr, i, j + 1, curr, color, target, { x: i, y: j });
-      floodFill(arr, i, j - 1, curr, color, target, { x: i, y: j });
+      floodFill(arr, i + 1, j, curr, color, { x: i, y: j });
+      floodFill(arr, i - 1, j, curr, color, { x: i, y: j });
+      floodFill(arr, i, j + 1, curr, color, { x: i, y: j });
+      floodFill(arr, i, j - 1, curr, color, { x: i, y: j });
       setArr([...arr]);
     }, speed);
     return { arr, color };
@@ -351,8 +362,8 @@ export default function Main() {
         prev = { i, j };
         // Check if the current cell is the target
         if (arr[i][j].x === target.x && arr[i][j].y === target.y) {
-          renderPrev(arr, arr[i][j].x, arr[i][j].y);
-          setArr([...arr]);
+          // renderPrev(arr, arr[i][j].x, arr[i][j].y);
+          // setArr([...arr]);
           return arr;
         }
         dxy = shuffle2DArray(dxy);
@@ -375,7 +386,20 @@ export default function Main() {
           >
             start/Reset
           </button> */}
-          <DropDown label={"reset options"} value={gridOption} options={gridOptions} onChange={handleReset}/>
+          <DropDown
+            label={"reset options"}
+            value={gridOption}
+            options={gridOptions}
+            onChange={handleReset}
+          />
+          <DropDown
+            label={"resize the grid"}
+            value={gridSize}
+            options={sizeType.map((item) => {
+              return { value: item, label: item };
+            })}
+            onChange={handleGridSize}
+          />
           <DropDown
             label={"select value"}
             options={algorithmOptions}
@@ -425,6 +449,7 @@ export default function Main() {
                 onMouseEnter={() => handleMouseEnter(x, y)}
                 onMouseUp={handleMouseUp}
                 value={value}
+                size={gridSize}
                 {...rest}
                 isSource={x === source.x && y === source.y}
                 isTarget={x === target.x && y === target.y}
@@ -436,3 +461,4 @@ export default function Main() {
     </>
   );
 }
+//Todo: dropdown UI, flood fill, run on same select, grid size
