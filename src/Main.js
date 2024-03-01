@@ -14,7 +14,7 @@ let row = 17,
   colorCount = 1;
 
 //speed is below 10 don't stop
-let speed = 0;
+let speed = 100;
 let pause = false;
 
 const inRange = (arr, i, j) => {
@@ -98,6 +98,7 @@ export default function Main() {
     setChangeSource(false);
   };
   const handleGridSize = (event) => {
+    
     let value = event.target.value;
     console.log(value);
     setGridSize(value);
@@ -137,11 +138,13 @@ export default function Main() {
       softReset();
     } else if (value === gridOptions[2].value) {
       //create Maze
+      setArr(createMap(row, col));
       createMaze();
     }
   };
   const handlePause = () => {
     pause = !pause;
+    setIsTarget(!isTarget)
     handleForceClick();
   };
   const handleChangeTarget = () => {
@@ -156,6 +159,8 @@ export default function Main() {
 
     //should I soft reset the grid before running
     //need to have drop down, para - target, source
+    pause = false;
+    setIsTarget(!isTarget)
     const value = algorithm;
     if (value === algorithmOptions[0].value) {
       //BFS
@@ -379,51 +384,61 @@ export default function Main() {
             start/Reset
           </button> */}
           <button
-            className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-r"
+            className="bg-gray-300 my-6 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-r"
             onClick={runAlgo}
           >
             Run
           </button>
           <DropDown
-            label={"reset options"}
+            label={"Grid options"}
             value={gridOption}
             options={gridOptions}
+            sx = {
+              {
+                mx:4,
+                mr: 4
+              }
+            }
             onChange={handleReset}
           />
-          <DropDown
+          {/* <DropDown
             label={"resize the grid"}
             value={gridSize}
             options={sizeType.map((item) => {
               return { value: item, label: item };
             })}
             onChange={handleGridSize}
-          />
+          /> */}
           <DropDown
-            label={"select value"}
+            label={"Select Algorithm"}
             options={algorithmOptions}
             value={algorithm}
+            
             onChange={handleAlgoChange}
           />
-          <button
+          {/* <button
             className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-r"
             onClick={handleChangeTarget}
           >
             {isTarget ? "select the target" : "No target selected "}
-          </button>
+          </button> */}
+          { (algorithm==algorithmOptions[0].value || algorithm==algorithmOptions[1].value ) && 
           <button
-            onClick={handlePause}
-            className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-r"
-          >
-            {pause ? "resume" : "pause"}
-          </button>
+          onClick={handlePause}
+          className="bg-gray-400 hover:bg-gray-500 my-6 text-gray-800 font-bold py-2 px-4 rounded-r"
+        >
+          { pause ? "resume" : "pause"}
+        </button>
+          }
+          
         </div>
-        <input
+        {/* <input
           onChange={handleSpeedChange}
           type="number"
           max="1000"
           min="0"
           value={speed}
-        />
+        /> */}
       </div>
       <div
         style={{
